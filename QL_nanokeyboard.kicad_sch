@@ -5,7 +5,7 @@
 	(uuid "5843e0c3-dcf7-499c-bade-cde915a50567")
 	(paper "A4")
 	(title_block
-		(title "Unknow Keyboard Interface for Sinclair QL")
+		(title "USB Keyboard Interface for Sinclair QL")
 		(date "2024-10-09")
 		(rev "0.1")
 		(company "by Alvaro Alea")

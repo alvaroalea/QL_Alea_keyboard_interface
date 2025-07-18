@@ -8,6 +8,12 @@
  All text above, and the splash screen below must be included in
  any redistribution
 *********************************************************************/
+// (C) 2024 Alvaro Alea Fdz and others.
+
+// Need:
+// Arduino pico: https://github.com/earlephilhower/arduino-pico
+// Adafruit TinyUSB Library for Arduino https://github.com/adafruit/Adafruit_TinyUSB_Arduino
+// Pico-PIO-USB https://github.com/sekigon-gonnoc/Pico-PIO-USB
 
 #include "usbh_helper.h"
 

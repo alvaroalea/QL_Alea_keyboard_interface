@@ -72,22 +72,22 @@ void setup()
 
 void loop()
 {
-//  static int c=0;
+  static bool lastk=0;
 //  static bool led=0;
   int16_t tecla =0;
   uint32_t out= 0;
   digitalWrite(10, HIGH);
   if ( keyboard_detect == 1 ) {
-    if (keycodes[0]>1){
+    if ((keycodes[0]>1) || (shift_key==1) || (ctrl_key==1) || (alt_key==1) ){
       tecla = keycode2QL[ (keycodes[0]) ][shift_key==0? 0 : 1] ;
-      if (keycodes[0]==42) {ctrl_key=1;}
+      if (keycodes[0]==42) {ctrl_key=1;}  //for the delete key
       if (shift_key==1) {tecla+=64;}
       if (ctrl_key==1) {tecla+=128;}
       if (alt_key==1) {tecla+=256;}
-      out = (tecla & 0b1111111111) | (tecla & 0b1110000000000)<<3 ;
+      out = (tecla & 0b0000001111111111) | (tecla & 0b001110000000000)<<3 ;
       gpio_put_masked(r2r_mask, out);
       digitalWrite(10, LOW);
-  
+      lastk=1;
       Serial.print("Keycode: "); Serial.print(keycodes[0]);
       Serial.print(" Tecla ") ; Serial.printf("%s",keycode2ST[keycodes[0]] );
       Serial.print(" QL: ") ; Serial.print(keycode2QL[ (keycodes[0]) ][shift_key==0? 0 : 1]);
@@ -98,7 +98,12 @@ void loop()
       Serial.print(tecla);
       Serial.print(" => ");
       Serial.println(out);
-    } 
+    } else if (lastk==1) {
+      out = 0 ;
+      gpio_put_masked(r2r_mask, out);
+      lastk=0;
+      Serial.println("No more keys");
+    }
   } 
   //Serial.flush();
   Serial.print(".");
@@ -157,7 +162,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
     keyboard_inst = instance;
     keyboard_dev = dev_addr;
     char tempbuf[256];
-    int count = sprintf(tempbuf, "[%04x:%04x][%u] HID Interface is %u, Protocol = %s\r\n", vid, pid, dev_addr, instance, protocol_str[itf_protocol]);
+    int count = sprintf(tempbuf, "\n[%04x:%04x][%u] HID Interface is %u, Protocol = %s\r\n", vid, pid, dev_addr, instance, protocol_str[itf_protocol]);
     Serial.println((char*)tempbuf);
   }
   if (itf_protocol==2) {
@@ -165,7 +170,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
     mouse_inst = instance;
     mouse_dev = dev_addr;
     char tempbuf[256];
-    int count = sprintf(tempbuf, "[%04x:%04x][%u] HID Interface is %u, Protocol = %s\r\n", vid, pid, dev_addr, instance, protocol_str[itf_protocol]);
+    int count = sprintf(tempbuf, "\n[%04x:%04x][%u] HID Interface is %u, Protocol = %s\r\n", vid, pid, dev_addr, instance, protocol_str[itf_protocol]);
     Serial.println((char*)tempbuf);
   }
 
@@ -176,7 +181,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* desc_re
   {
     if ( !tuh_hid_receive_report(dev_addr, instance) )
     {
-      Serial.println("Error: cannot request report");
+      Serial.println("\nError: cannot request report");
     }
   }
 }
@@ -186,7 +191,7 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
 {
   if ((mouse_inst == instance) && (mouse_dev == dev_addr)){
     mouse_detect = 0;
-    Serial.print("Mouse [");
+    Serial.print("\nMouse [");
     Serial.print(dev_addr);
     Serial.print("] interface ");
     Serial.print(instance);
@@ -194,7 +199,7 @@ void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
   }
   if ((keyboard_inst == instance) && (keyboard_dev = dev_addr)){
     keyboard_detect = 0;
-    Serial.print("Keyboard [");
+    Serial.print("\nKeyboard [");
     Serial.print(dev_addr);
     Serial.print("] interface ");
     Serial.print(instance);
@@ -241,7 +246,7 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
   }
    if ( !tuh_hid_receive_report(dev_addr, instance) ) //no idea, but need to mark report as received.
   {
-    Serial.println("Error: cannot request report");
+    Serial.println("\nError: cannot request report");
   } 
 }
 
